@@ -40,7 +40,7 @@ module Warden
       private
 
       def client
-        client = Aws::CognitoIdentityProvider::Client.new
+        Aws::CognitoIdentityProvider::Client.new
       end
 
       def local_user

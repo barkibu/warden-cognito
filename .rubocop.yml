@@ -1,0 +1,32 @@
+AllCops:
+  Exclude:
+    - 'bin/*'
+    - 'db/**/*'
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Metrics/LineLength:
+  AutoCorrect: true
+  Max: 120
+
+Metrics/BlockLength:
+  Enabled: false
+
+Metrics/AbcSize:
+  Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Enabled: false
+
+Metrics/MethodLength:
+  Enabled: false
+
+Metrics/PerceivedComplexity:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Style/MultilineBlockChain:
+  Enabled: false

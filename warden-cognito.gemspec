@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.email         = ['761794+jguitar@users.noreply.github.com']
 
   spec.summary       = 'Amazon Cognito authentication for Warden'
-  spec.description   = '[Unofficial] Amazon Cognito authentication for Warden allowing different strategies for authentication'
+  spec.description   = '[Unofficial] Authentication Strategy for Warden to allow Amazon Cognito user sign in and JWT'
   spec.homepage      = 'https://github.com/barkibu/warden-cognito'
   spec.license       = 'MIT'
 
@@ -34,6 +34,7 @@ Gem::Specification.new do |spec|
   spec.bindir        = 'exe'
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
+  spec.required_ruby_version = '>= 2.4.0'
 
   spec.add_dependency 'activesupport', '~> 6.0'
   spec.add_dependency 'aws-sdk-cognitoidentityprovider', '~> 1.47'
