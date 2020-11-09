@@ -84,7 +84,7 @@ RSpec.describe Warden::Cognito::TokenAuthenticatableStrategie do
         end
 
         it 'calls the `after_local_user_by_token_not_found` callback' do
-          expect(config).to receive(:after_local_user_by_token_not_found).with(decoded_token)
+          expect(config.after_local_user_by_token_not_found).to receive(:call).with(decoded_token).and_call_original
           strategy.authenticate!
         end
 

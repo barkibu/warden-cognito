@@ -82,7 +82,7 @@ RSpec.describe Warden::Cognito::AuthenticatableStrategie do
         end
 
         it 'calls the `after_local_user_by_credentials_not_found` callback' do
-          expect(config).to receive(:after_local_user_by_credentials_not_found).with(cognito_user)
+          expect(config.after_local_user_by_credentials_not_found).to receive(:call).with(cognito_user)
           strategy.authenticate!
         end
 

@@ -35,12 +35,16 @@ module Fixtures
   class Callback
     # Returning nil meaning we could not import the user
     def self.after_user_local_not_found_nil
-      nil
+      proc do |_arg|
+        nil
+      end
     end
 
     # Returning nil meaning the user eventually got created locally or is referencing a one-time external resource
     def self.after_user_local_not_found_user
-      User.instance
+      proc do |_arg|
+        User.instance
+      end
     end
   end
 end

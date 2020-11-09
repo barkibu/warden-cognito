@@ -27,9 +27,9 @@ Add to  your initializers the following:
 ```ruby
  Warden::Cognito.configure do |config|
     config.user_repository = User
-    config.identifying_attribute = :identifying_attribute
-    config.after_local_user_by_credentials_not_found = Fixtures::Callback.after_user_local_not_found_nil
-    config.after_local_user_by_token_not_found = Fixtures::Callback.after_user_local_not_found_nil
+    config.identifying_attribute = 'sub'
+    config.after_local_user_by_credentials_not_found = ->(cognito_user) { User.create(username: cognito_user.username) }
+    config.after_local_user_by_token_not_found = ->(decoded_token) { User.create(cognito_id: decoded_token['sub']) }
 end
 ```
 
