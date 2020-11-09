@@ -1,5 +1,7 @@
 # Warden::Cognito
 
+[![Codeship Status for barkibu/warden-cognito](https://app.codeship.com/projects/f305e0e4-e1e3-40ef-90b3-ab7475ed480c/status?branch=master)](https://app.codeship.com/projects/417617)
+
 Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/warden/cognito`. To experiment with that code, run `bin/console` for an interactive prompt.
 
 TODO: Delete this and the text above, and describe your gem
