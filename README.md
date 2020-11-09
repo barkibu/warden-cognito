@@ -22,7 +22,49 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+
+Add to  your initializers the following:
+```ruby
+ Warden::Cognito.configure do |config|
+    config.user_repository = User
+    config.identifying_attribute = :identifying_attribute
+    config.after_local_user_by_credentials_not_found = Fixtures::Callback.after_user_local_not_found_nil
+    config.after_local_user_by_token_not_found = Fixtures::Callback.after_user_local_not_found_nil
+end
+```
+
+### User Repository
+
+The user repository will be used to look for an entity to mark as authenticated, it must implement the following:
+- `find_by_cognito_username` that should return the user identified by the given username or nil
+- `find_by_cognito_attribute` that should return the user identified by the given Cognito User attribute (`config.identifying_attribute`) or nil
+
+### Callbacks
+
+#### `after_local_user_by_credentials_not_found`
+
+A callback triggered whenever the user correctly authenticated on Cognito but no local user exists (receives the full [cognito user](https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/CognitoIdentityProvider/Types/GetUserResponse.html))
+
+#### `after_local_user_by_token_not_found`
+
+A callback triggered whenever the user has a valid Cognito JWT but no local user exists. It receives as param the decoded payload, for instance:
+
+```json
+{
+  "sub": "54318465-/***/-50d9a32bb9",
+  "aud": "5rbi/***/1ob58b",
+  "email_verified": true,
+  "event_id": "ff772ae4/***/4c59759d0f",
+  "token_use": "id",
+  "custom:foo": "bar",
+  "auth_time": 1604052748,
+  "iss": "https://cognito-idp.eu-west-1.amazonaws.com/eu-west-1_zpxXxXxX",
+  "cognito:username": "54318465-b153-44e0-b834-0550d9a32bb9",
+  "exp": 1604056348,
+  "iat": 1604052748,
+  "email": "jmj@barkibu.com"
+}
+```
 
 ## Development
 
