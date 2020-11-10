@@ -15,9 +15,9 @@ module Warden
       end
 
       def jwks
-        # Rails.cache.fetch(JWK_KEYS_URL, expires_in: 1.hour) do
-        JSON.parse(HTTP.get(jwk_url).body.to_s).deep_symbolize_keys
-        # end
+        config.cache.fetch(JWK_KEYS_URL, expires_in: 1.hour) do
+          JSON.parse(HTTP.get(jwk_url).body.to_s).deep_symbolize_keys
+        end
       end
 
       def valid?
@@ -29,7 +29,7 @@ module Warden
       end
 
       def authenticate!
-        user = local_user || helper::ByToken.after_user_local_not_found(decoded_token)
+        user = local_user || config.after_local_user_not_found&.call(cognito_user)
         fail!(:unknown_user) unless user.present?
         success!(user)
       rescue ::JWT::ExpiredSignature
@@ -49,11 +49,31 @@ module Warden
       end
 
       def local_user
-        helper.find_by_cognito_attribute(identifier)
+        helper.find_by_cognito_attribute(local_identifier)
       end
 
-      def identifier
-        decoded_token.first[identifying_attribute]
+      def cognito_user_cache_key
+        "COGNITO_LOCAL_IDENTIFIER_#{cognito_user_identifier}"
+      end
+
+      def cognito_user_identifier
+        decoded_token.first['sub']
+      end
+
+      def local_identifier
+        config.cache.fetch(cognito_user_cache_key) do
+          user_attribute identifying_attribute
+        end
+      end
+
+      def cognito_user
+        @cognito_user ||= CognitoClient.fetch(token)
+      end
+
+      def user_attribute(attribute_name)
+        cognito_user.user_attributes.detect do |attribute|
+          attribute.name == attribute_name
+        end&.value
       end
 
       def identifying_attribute

@@ -16,14 +16,7 @@ module Warden
       end
 
       def authenticate!
-        initiate_auth_response = client.initiate_auth(
-          client_id: ENV['AWS_COGNITO_CLIENT_ID'],
-          auth_flow: 'USER_PASSWORD_AUTH',
-          auth_parameters: {
-            'USERNAME' => email,
-            'PASSWORD' => password
-          }
-        )
+        initiate_auth_response = CognitoClient.initiate_auth(email, password)
 
         return fail(:unknow_cognito_response) unless initiate_auth_response
 
@@ -39,18 +32,13 @@ module Warden
 
       private
 
-      def client
-        Aws::CognitoIdentityProvider::Client.new
-      end
-
       def local_user
         helper.find_by_cognito_username(email)
       end
 
       def after_user_local_not_found(authentication_result)
-        # https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/CognitoIdentityProvider/Types/GetUserResponse.html
-        user_response = client.get_user(access_token: authentication_result.access_token)
-        helper::ByCredentials.after_user_local_not_found(user_response)
+        user_response = CognitoClient.fetch(authentication_result.access_token)
+        Cognito.config.after_local_user_not_found&.call(user_response)
       end
 
       def cognito_authenticable?

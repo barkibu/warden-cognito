@@ -12,8 +12,8 @@ module Warden
 
     setting :user_repository
     setting :identifying_attribute, 'sub'
-    setting :after_local_user_by_credentials_not_found
-    setting :after_local_user_by_token_not_found
+    setting :after_local_user_not_found
+    setting :cache, ActiveSupport::Cache::NullStore.new
 
     Import = Dry::AutoInject(config)
   end
@@ -23,3 +23,4 @@ require 'warden/cognito/version'
 require 'warden/cognito/authenticatable_strategie'
 require 'warden/cognito/token_authenticatable_strategie'
 require 'warden/cognito/user_helper'
+require 'warden/cognito/cognito_client'

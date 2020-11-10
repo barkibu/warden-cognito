@@ -30,8 +30,8 @@ Add to  your initializers the following:
  Warden::Cognito.configure do |config|
     config.user_repository = User
     config.identifying_attribute = 'sub'
-    config.after_local_user_by_credentials_not_found = ->(cognito_user) { User.create(username: cognito_user.username) }
-    config.after_local_user_by_token_not_found = ->(decoded_token) { User.create(cognito_id: decoded_token['sub']) }
+    config.after_local_user_not_found = ->(cognito_user) { User.create(username: cognito_user.username) }
+    config.cache =  ActiveSupport::Cache::MemCacheStore.new
 end
 ```
 
@@ -41,32 +41,13 @@ The user repository will be used to look for an entity to mark as authenticated,
 - `find_by_cognito_username` that should return the user identified by the given username or nil
 - `find_by_cognito_attribute` that should return the user identified by the given Cognito User attribute (`config.identifying_attribute`) or nil
 
-### Callbacks
-
-#### `after_local_user_by_credentials_not_found`
+### `after_local_user_not_found` Callback
 
 A callback triggered whenever the user correctly authenticated on Cognito but no local user exists (receives the full [cognito user](https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/CognitoIdentityProvider/Types/GetUserResponse.html))
 
-#### `after_local_user_by_token_not_found`
-
-A callback triggered whenever the user has a valid Cognito JWT but no local user exists. It receives as param the decoded payload, for instance:
-
-```json
-{
-  "sub": "54318465-/***/-50d9a32bb9",
-  "aud": "5rbi/***/1ob58b",
-  "email_verified": true,
-  "event_id": "ff772ae4/***/4c59759d0f",
-  "token_use": "id",
-  "custom:foo": "bar",
-  "auth_time": 1604052748,
-  "iss": "https://cognito-idp.eu-west-1.amazonaws.com/eu-west-1_zpxXxXxX",
-  "cognito:username": "54318465-b153-44e0-b834-0550d9a32bb9",
-  "exp": 1604056348,
-  "iat": 1604052748,
-  "email": "jmj@barkibu.com"
-}
-```
+### Cache 
+The cache used to store the AWS Json Web Keys as well as the mapping between local and remote identifiers.
+Defaults to `ActiveSupport::Cache::NullStore`
 
 ## Development
 

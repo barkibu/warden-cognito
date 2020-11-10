@@ -10,7 +10,6 @@ RSpec.describe Warden::Cognito::AuthenticatableStrategie do
   let(:path) { '/v1/resource' }
   let(:email) { 'test@example.com' } # user.email
   let(:password) { 'MyPassW0r1' } # user.password
-  let(:cognito_user) { { username: 'jmj@barkibu.com', user_attributes: [{ name: 'locale', value: 'es' }] } }
   let(:params) do
     {
       v2_user: {
@@ -81,14 +80,14 @@ RSpec.describe Warden::Cognito::AuthenticatableStrategie do
           allow(client).to receive(:get_user).and_return cognito_user
         end
 
-        it 'calls the `after_local_user_by_credentials_not_found` callback' do
-          expect(config.after_local_user_by_credentials_not_found).to receive(:call).with(cognito_user)
+        it 'calls the `after_local_user_not_found` callback' do
+          expect(config.after_local_user_not_found).to receive(:call).with(cognito_user)
           strategy.authenticate!
         end
 
-        context 'with `after_local_user_by_credentials_not_found` returning nil' do
+        context 'with `after_local_user_not_found` returning nil' do
           before do
-            config.after_local_user_by_credentials_not_found = Fixtures::Callback.after_user_local_not_found_nil
+            config.after_local_user_not_found = Fixtures::Callback.after_user_local_not_found_nil
           end
 
           it 'fails! with :unknown_user' do
@@ -97,9 +96,9 @@ RSpec.describe Warden::Cognito::AuthenticatableStrategie do
           end
         end
 
-        context 'with `after_local_user_by_credentials_not_found` returning a user' do
+        context 'with `after_local_user_not_found` returning a user' do
           before do
-            config.after_local_user_by_credentials_not_found = Fixtures::Callback.after_user_local_not_found_user
+            config.after_local_user_not_found = Fixtures::Callback.after_user_local_not_found_user
           end
 
           it 'success! with the given user' do

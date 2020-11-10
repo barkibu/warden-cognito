@@ -11,16 +11,18 @@ RSpec.describe Warden::Cognito::TokenAuthenticatableStrategie do
   let(:env) { Rack::MockRequest.env_for(path, method: 'GET').merge(headers) }
   let(:strategy) { described_class.new(env) }
   let(:kb_uuid) { user.id }
-  let(:identifier) { 'Specific Value' }
   let(:decoded_token) do
     [
       {
-        identifying_attribute.to_s => identifier
+        'sub' => 'CognitoUserId'
       }
     ]
   end
 
+  let(:client) { double 'Client' }
+
   before do
+    allow(Aws::CognitoIdentityProvider::Client).to receive(:new).and_return client
     allow(JWT).to receive(:decode).and_return(decoded_token)
     allow(strategy).to receive(:jwks).and_return []
   end
@@ -70,9 +72,11 @@ RSpec.describe Warden::Cognito::TokenAuthenticatableStrategie do
     end
 
     context 'with a valid token' do
+      before { allow(client).to receive(:get_user).and_return cognito_user }
+
       context 'referencing an existing (local) user' do
         it 'succeeds with the user instance' do
-          expect(config.user_repository).to receive(:find_by_cognito_attribute).with(identifier).and_call_original
+          expect(config.user_repository).to receive(:find_by_cognito_attribute).with(local_identifier).and_call_original
           expect(strategy).to receive(:success!).with(user)
           strategy.authenticate!
         end
@@ -83,14 +87,14 @@ RSpec.describe Warden::Cognito::TokenAuthenticatableStrategie do
           config.user_repository = nil_user_repository
         end
 
-        it 'calls the `after_local_user_by_token_not_found` callback' do
-          expect(config.after_local_user_by_token_not_found).to receive(:call).with(decoded_token).and_call_original
+        it 'calls the `after_local_user_not_found` callback' do
+          expect(config.after_local_user_not_found).to receive(:call).with(cognito_user).and_call_original
           strategy.authenticate!
         end
 
-        context 'with `after_local_user_by_token_not_found` returning nil' do
+        context 'with `after_local_user_not_found` returning nil' do
           before do
-            config.after_local_user_by_token_not_found = Fixtures::Callback.after_user_local_not_found_nil
+            config.after_local_user_not_found = Fixtures::Callback.after_user_local_not_found_nil
           end
 
           it 'fails! with :unknown_user' do
@@ -99,9 +103,9 @@ RSpec.describe Warden::Cognito::TokenAuthenticatableStrategie do
           end
         end
 
-        context 'with `after_local_user_by_token_not_found` returning a user' do
+        context 'with `after_local_user_not_found` returning a user' do
           before do
-            config.after_local_user_by_token_not_found = Fixtures::Callback.after_user_local_not_found_user
+            config.after_local_user_not_found = Fixtures::Callback.after_user_local_not_found_user
           end
 
           it 'success! with the given user' do
