@@ -5,19 +5,18 @@ module Warden
   module Cognito
     class TokenAuthenticatableStrategie < Warden::Strategies::Base
       METHOD = 'Bearer'.freeze
-      ISSUER = "https://cognito-idp.#{ENV['AWS_REGION']}.amazonaws.com/#{ENV['AWS_COGNITO_USER_POOL_ID']}".freeze
-      JWK_KEYS_URL = "#{ISSUER}/.well-known/jwks.json".freeze
 
-      attr_reader :helper
+      attr_reader :helper, :config
 
       def initialize(env, scope = nil)
         super
+        @config = Cognito.config
         @helper = UserHelper
       end
 
       def jwks
         # Rails.cache.fetch(JWK_KEYS_URL, expires_in: 1.hour) do
-        JSON.parse(HTTP.get(JWK_KEYS_URL).body.to_s).deep_symbolize_keys
+        JSON.parse(HTTP.get(jwk_url).body.to_s).deep_symbolize_keys
         # end
       end
 
@@ -41,6 +40,14 @@ module Warden
 
       private
 
+      def jwt_issuer
+        "https://cognito-idp.#{ENV['AWS_REGION']}.amazonaws.com/#{ENV['AWS_COGNITO_USER_POOL_ID']}"
+      end
+
+      def jwk_url
+        "#{jwt_issuer}/.well-known/jwks.json"
+      end
+
       def local_user
         helper.find_by_cognito_attribute(identifier)
       end
@@ -50,11 +57,11 @@ module Warden
       end
 
       def identifying_attribute
-        Cognito.config.identifying_attribute.to_s
+        config.identifying_attribute.to_s
       end
 
       def decoded_token
-        @decoded_token ||= ::JWT.decode(token, nil, true, iss: ISSUER, verify_iss: true,
+        @decoded_token ||= ::JWT.decode(token, nil, true, iss: jwt_issuer, verify_iss: true,
                                                           algorithms: ['RS256'], jwks: jwks)
       end
 
