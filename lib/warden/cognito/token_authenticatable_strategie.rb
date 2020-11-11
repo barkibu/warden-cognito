@@ -15,7 +15,7 @@ module Warden
       end
 
       def jwks
-        config.cache.fetch(JWK_KEYS_URL, expires_in: 1.hour) do
+        config.cache.fetch(jwk_url, expires_in: 1.hour) do
           JSON.parse(HTTP.get(jwk_url).body.to_s).deep_symbolize_keys
         end
       end
