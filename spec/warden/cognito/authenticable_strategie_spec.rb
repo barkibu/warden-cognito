@@ -55,7 +55,7 @@ RSpec.describe Warden::Cognito::AuthenticatableStrategie do
       end
 
       it 'call fail' do
-        expect(strategy).to receive(:fail).with(:invalid_login)
+        expect(strategy).to receive(:fail!).with(:invalid_login)
         strategy.authenticate!
       end
     end

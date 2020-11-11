@@ -25,7 +25,7 @@ module Warden
         fail!(:unknown_user) unless user.present?
         success!(user)
       rescue Aws::CognitoIdentityProvider::Errors::NotAuthorizedException
-        fail(:invalid_login)
+        fail!(:invalid_login)
       rescue StandardError
         fail(:unknow_cognito_response)
       end
