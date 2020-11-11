@@ -61,7 +61,7 @@ module Warden
       end
 
       def local_identifier
-        config.cache.fetch(cognito_user_cache_key) do
+        config.cache.fetch(cognito_user_cache_key, skip_nil: true) do
           user_attribute identifying_attribute
         end
       end
