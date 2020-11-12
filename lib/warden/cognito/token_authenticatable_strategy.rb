@@ -3,7 +3,7 @@ require 'aws-sdk-cognitoidentityprovider'
 
 module Warden
   module Cognito
-    class TokenAuthenticatableStrategie < Warden::Strategies::Base
+    class TokenAuthenticatableStrategy < Warden::Strategies::Base
       METHOD = 'Bearer'.freeze
 
       attr_reader :helper, :config
@@ -104,4 +104,4 @@ module Warden
 end
 # rubocop:enable Style/SignalException
 
-Warden::Strategies.add(:cognito_jwt, Warden::Cognito::TokenAuthenticatableStrategie)
+Warden::Strategies.add(:cognito_jwt, Warden::Cognito::TokenAuthenticatableStrategy)

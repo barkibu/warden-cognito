@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'rack'
 
-RSpec.describe Warden::Cognito::TokenAuthenticatableStrategie do
+RSpec.describe Warden::Cognito::TokenAuthenticatableStrategy do
   include_context 'fixtures'
   include_context 'configuration'
 

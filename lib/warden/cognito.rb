@@ -20,7 +20,7 @@ module Warden
 end
 
 require 'warden/cognito/version'
-require 'warden/cognito/authenticatable_strategie'
-require 'warden/cognito/token_authenticatable_strategie'
+require 'warden/cognito/authenticatable_strategy'
+require 'warden/cognito/token_authenticatable_strategy'
 require 'warden/cognito/user_helper'
 require 'warden/cognito/cognito_client'
