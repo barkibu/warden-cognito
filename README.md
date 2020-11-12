@@ -1,5 +1,7 @@
 # Warden::Cognito
 
+[![Codeship Status for barkibu/warden-cognito](https://app.codeship.com/projects/f305e0e4-e1e3-40ef-90b3-ab7475ed480c/status?branch=master)](https://app.codeship.com/projects/417617)
+
 Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/warden/cognito`. To experiment with that code, run `bin/console` for an interactive prompt.
 
 TODO: Delete this and the text above, and describe your gem
@@ -22,7 +24,30 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+
+Add to  your initializers the following:
+```ruby
+ Warden::Cognito.configure do |config|
+    config.user_repository = User
+    config.identifying_attribute = 'sub'
+    config.after_local_user_not_found = ->(cognito_user) { User.create(username: cognito_user.username) }
+    config.cache =  ActiveSupport::Cache::MemCacheStore.new
+end
+```
+
+### User Repository
+
+The user repository will be used to look for an entity to mark as authenticated, it must implement the following:
+- `find_by_cognito_username` that should return the user identified by the given username or nil
+- `find_by_cognito_attribute` that should return the user identified by the given Cognito User attribute (`config.identifying_attribute`) or nil
+
+### `after_local_user_not_found` Callback
+
+A callback triggered whenever the user correctly authenticated on Cognito but no local user exists (receives the full [cognito user](https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/CognitoIdentityProvider/Types/GetUserResponse.html))
+
+### Cache 
+The cache used to store the AWS Json Web Keys as well as the mapping between local and remote identifiers.
+Defaults to `ActiveSupport::Cache::NullStore`
 
 ## Development
 
