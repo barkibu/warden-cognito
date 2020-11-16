@@ -24,7 +24,6 @@ Or install it yourself as:
 
 ## Usage
 
-
 Add to  your initializers the following:
 ```ruby
  Warden::Cognito.configure do |config|
@@ -34,6 +33,11 @@ Add to  your initializers the following:
     config.cache =  ActiveSupport::Cache::MemCacheStore.new
 end
 ```
+
+This gem will look for the following the env variables:
+- **AWS_REGION**
+- **AWS_COGNITO_USER_POOL_ID**
+- **AWS_COGNITO_CLIENT_ID**
 
 ### User Repository
 
