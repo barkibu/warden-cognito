@@ -6,6 +6,10 @@ module Fixtures
   # An user record
   class User
     include Singleton
+
+    def cognito_identifier
+      1
+    end
   end
 
   # User repository

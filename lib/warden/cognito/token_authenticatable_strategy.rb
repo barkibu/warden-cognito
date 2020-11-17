@@ -6,18 +6,11 @@ module Warden
     class TokenAuthenticatableStrategy < Warden::Strategies::Base
       METHOD = 'Bearer'.freeze
 
-      attr_reader :helper, :config
+      attr_reader :config
 
       def initialize(env, scope = nil)
         super
         @config = Cognito.config
-        @helper = UserHelper
-      end
-
-      def jwks
-        config.cache.fetch(jwk_url, expires_in: 1.hour) do
-          JSON.parse(HTTP.get(jwk_url).body.to_s).deep_symbolize_keys
-        end
       end
 
       def valid?
@@ -29,7 +22,7 @@ module Warden
       end
 
       def authenticate!
-        user = local_user || config.after_local_user_not_found&.call(cognito_user)
+        user = local_user
         fail!(:unknown_user) unless user.present?
         success!(user)
       rescue ::JWT::ExpiredSignature
@@ -40,49 +33,23 @@ module Warden
 
       private
 
-      def jwt_issuer
-        "https://cognito-idp.#{ENV['AWS_REGION']}.amazonaws.com/#{ENV['AWS_COGNITO_USER_POOL_ID']}"
-      end
-
-      def jwk_url
-        "#{jwt_issuer}/.well-known/jwks.json"
-      end
-
-      def local_user
-        helper.find_by_cognito_attribute(local_identifier)
-      end
-
-      def cognito_user_cache_key
-        "COGNITO_LOCAL_IDENTIFIER_#{cognito_user_identifier}"
-      end
-
-      def cognito_user_identifier
+      def subject
         decoded_token.first['sub']
       end
 
-      def local_identifier
-        config.cache.fetch(cognito_user_cache_key, skip_nil: true) do
-          user_attribute identifying_attribute
-        end
+      def local_user
+        subject_decoder.to_user!
+      rescue SubjectDecoder::LocalUserNotFound => e
+        config.after_local_user_not_found&.call(e.cognito_user)
       end
 
-      def cognito_user
-        @cognito_user ||= CognitoClient.fetch(token)
-      end
-
-      def user_attribute(attribute_name)
-        cognito_user.user_attributes.detect do |attribute|
-          attribute.name == attribute_name
-        end&.value
-      end
-
-      def identifying_attribute
-        config.identifying_attribute.to_s
+      def subject_decoder
+        config.subject_decoder.new(subject, token)
       end
 
       def decoded_token
-        @decoded_token ||= ::JWT.decode(token, nil, true, iss: jwt_issuer, verify_iss: true,
-                                                          algorithms: ['RS256'], jwks: jwks)
+        @decoded_token ||= ::JWT.decode(token, nil, true, iss: jwk_loader.jwt_issuer, verify_iss: true,
+                                                          algorithms: ['RS256'], jwks: jwk_loader)
       end
 
       def token
@@ -98,6 +65,10 @@ module Warden
 
       def authorization_header
         env['HTTP_AUTHORIZATION']
+      end
+
+      def jwk_loader
+        config.jwk_loader
       end
     end
   end
