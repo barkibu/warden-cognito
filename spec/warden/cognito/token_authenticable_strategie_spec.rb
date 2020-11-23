@@ -9,7 +9,7 @@ RSpec.describe Warden::Cognito::TokenAuthenticatableStrategy do
   let(:headers) { { 'HTTP_AUTHORIZATION' => "Bearer #{jwt_token}" } }
   let(:path) { '/v1/resource' }
   let(:env) { Rack::MockRequest.env_for(path, method: 'GET').merge(headers) }
-  let(:strategy) { described_class.new(env) }
+  subject(:strategy) { described_class.new(env) }
   let(:kb_uuid) { user.id }
   let(:decoded_token) do
     [
