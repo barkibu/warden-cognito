@@ -74,6 +74,10 @@ The user repository will be used to look for an entity to mark as authenticated,
 - `find_by_cognito_username` that should return the user identified by the given username or nil
 - `find_by_cognito_attribute` that should return the user identified by the given Cognito User attribute (`config.identifying_attribute`) or nil
 
+### User Model
+
+The user model must expose a message `cognito_id` that returns the `identifying_attribute` for the given user.
+
 ### `after_local_user_not_found` Callback
 
 A callback triggered whenever the user correctly authenticated on Cognito but no local user exists (receives the full [cognito user](https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/CognitoIdentityProvider/Types/GetUserResponse.html))

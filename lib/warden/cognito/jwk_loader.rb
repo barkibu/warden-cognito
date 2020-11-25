@@ -2,12 +2,15 @@ module Warden
   module Cognito
     class JwkLoader
       include Cognito::Import['cache']
+      include Cognito::Import['jwk']
 
       def jwt_issuer
-        "https://cognito-idp.#{ENV['AWS_REGION']}.amazonaws.com/#{ENV['AWS_COGNITO_USER_POOL_ID']}"
+        jwk.issuer || "https://cognito-idp.#{ENV['AWS_REGION']}.amazonaws.com/#{ENV['AWS_COGNITO_USER_POOL_ID']}"
       end
 
       def call(options)
+        return { keys: [jwk.key.export] } if jwk.key.present?
+
         cache.clear(jwk_url) if options[:invalidate]
 
         cache.fetch(jwk_url, expires_in: 1.hour) do
