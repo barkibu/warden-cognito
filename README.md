@@ -24,7 +24,7 @@ Or install it yourself as:
 
 ## Usage
 
-Add to  your initializers the following:
+Configure how the gem maps Cognito users to local ones adding to your initializers the following:
 ```ruby
  Warden::Cognito.configure do |config|
     config.user_repository = User
@@ -38,6 +38,35 @@ This gem will look for the following the env variables:
 - **AWS_REGION**
 - **AWS_COGNITO_USER_POOL_ID**
 - **AWS_COGNITO_CLIENT_ID**
+
+### With Devise
+
+You can know protects endpoints by settings the available strategies in the Warden section of your Device's configuration:
+```ruby
+  # config/initializers/devise.rb
+  # 
+  # /***/
+  config.warden do |manager|
+    manager.default_strategies(scope: :user).unshift :cognito_auth
+    manager.default_strategies(scope: :user).unshift :cognito_jwt
+    # /***/
+  end
+```
+
+### API
+
+This gem also exposes classes that you can use to validate tokens and/or fetch a user from a given token:
+
+```ruby
+token = 'The token a user passed along in a request'
+token_decoder = TokenDecoder.new(token)
+
+# Is the token valid ?
+token_decoder.validate!
+
+# Who is the local user associated with this token
+user = LocalUserMapper.new.call(token_decoder)
+```
 
 ### User Repository
 
