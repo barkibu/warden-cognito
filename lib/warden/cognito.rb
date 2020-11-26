@@ -14,18 +14,19 @@ module Warden
       %i[key issuer]
     end
 
-    # rubocop:disable Style/AccessModifierDeclarations
-    module_function :jwk_config_keys
-    # rubocop:enable Style/AccessModifierDeclarations
+    def jwk_instance(value)
+      attributes = value&.symbolize_keys&.slice(*jwk_config_keys) || {}
+      Struct.new(*jwk_config_keys, keyword_init: true).new(attributes)
+    end
+
+    module_function :jwk_config_keys, :jwk_instance
 
     setting :user_repository
     setting(:identifying_attribute, 'sub', &:to_s)
     setting :after_local_user_not_found
     setting :cache, ActiveSupport::Cache::NullStore.new
 
-    setting(:jwk, nil) do |value|
-      Struct.new(*jwk_config_keys, keyword_init: true).new(**(value&.symbolize_keys&.slice(*jwk_config_keys) || {}))
-    end
+    setting(:jwk, nil) { |value| jwk_instance(value) }
 
     Import = Dry::AutoInject(config)
   end
