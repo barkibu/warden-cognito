@@ -6,7 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Add Travis setup
+
 ## [0.1.0]
+
 - Scratching the gem
 
 [Unreleased]: https://github.com/barkibu/warden-cognito/compare/v0.1.0...HEAD
