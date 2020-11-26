@@ -9,8 +9,6 @@ RSpec.describe Warden::Cognito::TokenAuthenticatableStrategy do
   let(:headers) { { 'HTTP_AUTHORIZATION' => "Bearer #{jwt_token}" } }
   let(:path) { '/v1/resource' }
   let(:env) { Rack::MockRequest.env_for(path, method: 'GET').merge(headers) }
-  let(:strategy) { described_class.new(env) }
-  let(:kb_uuid) { user.id }
   let(:decoded_token) do
     [
       {
@@ -20,6 +18,8 @@ RSpec.describe Warden::Cognito::TokenAuthenticatableStrategy do
   end
 
   let(:client) { double 'Client' }
+
+  subject(:strategy) { described_class.new(env) }
 
   before do
     allow(Aws::CognitoIdentityProvider::Client).to receive(:new).and_return client

@@ -4,11 +4,12 @@ require 'aws-sdk-cognitoidentityprovider'
 module Warden
   module Cognito
     class AuthenticatableStrategy < Warden::Strategies::Base
-      attr_reader :helper
+      attr_reader :helper, :user_not_found_callback
 
       def initialize(env, scope = nil)
         super
-        @helper = UserHelper
+        @user_not_found_callback = UserNotFoundCallback.new
+        @helper = UserHelper.new
       end
 
       def valid?
@@ -16,11 +17,11 @@ module Warden
       end
 
       def authenticate!
-        initiate_auth_response = CognitoClient.initiate_auth(email, password)
+        attempt = CognitoClient.initiate_auth(email, password)
 
-        return fail(:unknow_cognito_response) unless initiate_auth_response
+        return fail(:unknow_cognito_response) unless attempt
 
-        user = local_user || after_user_local_not_found(initiate_auth_response.authentication_result)
+        user = local_user || trigger_callback(attempt.authentication_result)
 
         fail!(:unknown_user) unless user.present?
         success!(user)
@@ -32,13 +33,13 @@ module Warden
 
       private
 
-      def local_user
-        helper.find_by_cognito_username(email)
+      def trigger_callback(authentication_result)
+        cognito_user = CognitoClient.fetch(authentication_result.access_token)
+        user_not_found_callback.call(cognito_user)
       end
 
-      def after_user_local_not_found(authentication_result)
-        user_response = CognitoClient.fetch(authentication_result.access_token)
-        Cognito.config.after_local_user_not_found&.call(user_response)
+      def local_user
+        helper.find_by_cognito_username(email)
       end
 
       def cognito_authenticable?
