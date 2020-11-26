@@ -34,7 +34,7 @@ RSpec.describe Warden::Cognito::TestHelpers do
       token_decoder = token_decoder(auth_headers)
 
       expect(user_repository).to receive(:find_by_cognito_attribute).with(cognito_id).and_return(user)
-      expect(Warden::Cognito::LocalUserMapper.new.call(token_decoder)).to eq user
+      expect(Warden::Cognito::LocalUserMapper.find(token_decoder)).to eq user
     end
 
     def token_decoder(headers)

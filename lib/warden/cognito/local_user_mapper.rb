@@ -3,6 +3,16 @@ module Warden
     class LocalUserMapper
       include Cognito::Import['cache', 'identifying_attribute']
 
+      class << self
+        def find(token_decoder)
+          new.call(token_decoder)
+        end
+
+        def find_by_token(token)
+          find(TokenDecoder.new(token))
+        end
+      end
+
       def call(token_decoder)
         helper.find_by_cognito_attribute local_identifier(token_decoder)
       end

@@ -53,21 +53,6 @@ You can know protects endpoints by settings the available strategies in the Ward
   end
 ```
 
-### API
-
-This gem also exposes classes that you can use to validate tokens and/or fetch a user from a given token:
-
-```ruby
-token = 'The token a user passed along in a request'
-token_decoder = TokenDecoder.new(token)
-
-# Is the token valid ?
-token_decoder.validate!
-
-# Who is the local user associated with this token
-user = LocalUserMapper.new.call(token_decoder)
-```
-
 ### User Repository
 
 The user repository will be used to look for an entity to mark as authenticated, it must implement the following:
@@ -85,6 +70,70 @@ A callback triggered whenever the user correctly authenticated on Cognito but no
 ### Cache 
 The cache used to store the AWS Json Web Keys as well as the mapping between local and remote identifiers.
 Defaults to `ActiveSupport::Cache::NullStore`
+
+### Testing
+
+The TestHelpers module is here to help testing code using this gem to validate tokens and authenticate users:
+
+Create a module and make sure it is loaded as part of the support files of your rspec configuration:
+
+```ruby
+module Helpers
+  module JWT
+    def self.included(base)
+      base.class_eval do
+        Warden::Cognito::TestHelpers.setup
+      end
+    end
+
+    def auth_headers_for_user(user, headers = {})
+      Warden::Cognito::TestHelpers.auth_headers(headers, user)
+    end
+
+    def jwt_for_user(user)
+      auth_headers_for_user(user)[:Authorization].split[1]
+    end
+  end
+end
+```
+
+Include this module in the relevant test types:
+```ruby
+RSpec.configure do |config|
+  # /***/
+  config.include Helpers::JWT, type: :request
+end
+```
+
+You can now generate tokens for your users in your tests, for instance:
+```ruby
+let(:user) { create(:user) } # Your users needs to be available through the UserRepository you defined
+let(:headers) { auth_headers_for_user(user) }
+let(:token) { jwt_for_user(user) }
+```
+
+### API
+
+This gem also exposes classes that you can use to validate tokens and/or fetch a user from a given token:
+
+```ruby
+token = 'The token a user passed along in a request'
+token_decoder = TokenDecoder.new(token)
+
+# Is the token valid ?
+token_decoder.validate!
+
+# What's in this token ?
+token_decoder.decoded_token
+
+# What's the phone_number attribute of the user identified by this token ?
+token_decoder.user_attribute('phone_number')
+
+# Who is the local user associated with this token
+user = LocalUserMapper.find(token_decoder)
+# or 
+user = LocalUserMapper.find_by_token(token)
+```
 
 ## Development
 
@@ -104,7 +153,7 @@ An then, for example:
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/warden-cognito.
+Bug reports and pull requests are welcome on GitHub at https://github.com/barkibu/warden-cognito.
 
 ## License
 

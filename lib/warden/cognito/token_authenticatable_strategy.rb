@@ -22,7 +22,7 @@ module Warden
       end
 
       def authenticate!
-        user = local_user || UserNotFoundCallback.new.call(cognito_user)
+        user = local_user || UserNotFoundCallback.call(cognito_user)
 
         fail!(:unknown_user) unless user.present?
         success!(user)
@@ -39,7 +39,7 @@ module Warden
       end
 
       def local_user
-        LocalUserMapper.new.call token_decoder
+        LocalUserMapper.find token_decoder
       end
 
       def token_decoder
