@@ -11,7 +11,7 @@ module Warden
       def call(options)
         return { keys: [jwk.key.export] } if jwk.key.present?
 
-        cache.clear(jwk_url) if options[:invalidate]
+        cache.delete(jwk_url) if options[:invalidate]
 
         cache.fetch(jwk_url, expires_in: 1.hour) do
           JSON.parse(HTTP.get(jwk_url).body.to_s).deep_symbolize_keys
