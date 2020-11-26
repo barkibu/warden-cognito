@@ -6,11 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0]
+- Extended exposed API
+- TestHelpers utils
 - Add Travis setup
 
 ## [0.1.0]
 
 - Scratching the gem
 
-[Unreleased]: https://github.com/barkibu/warden-cognito/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/barkibu/warden-cognito/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/barkibu/warden-cognito/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/barkibu/warden-cognito/releases/tag/v0.1.0
