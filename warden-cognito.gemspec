@@ -5,7 +5,7 @@ require 'warden/cognito/version'
 Gem::Specification.new do |spec|
   spec.name          = 'warden-cognito'
   spec.version       = Warden::Cognito::VERSION
-  spec.authors       = ['Juan F. Pérez']
+  spec.authors       = ['Juan F. Pérez', 'Léo Figea']
   spec.email         = ['761794+jguitar@users.noreply.github.com']
 
   spec.summary       = 'Amazon Cognito authentication for Warden'
