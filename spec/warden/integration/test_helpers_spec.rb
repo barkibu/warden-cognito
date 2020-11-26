@@ -8,15 +8,14 @@ RSpec.describe Warden::Cognito::TestHelpers do
   describe '#auth_headers' do
     let(:headers) { { foo: 'bar' } }
     let(:user_repository) { double 'UserRepository' }
-    let(:user) { double 'User' }
     let(:cognito_id) { 'User Cognito Identifying Attribute Value' }
+    let(:user) { double 'User', cognito_id: cognito_id }
 
     subject(:auth_headers) { Warden::Cognito::TestHelpers.auth_headers(headers, user) }
 
     before do
       Warden::Cognito.config.user_repository = user_repository
       Warden::Cognito::TestHelpers.setup
-      allow(user).to receive(:cognito_id).and_return(cognito_id)
     end
 
     it 'overrides the headers with Bearer token in Authorization' do
