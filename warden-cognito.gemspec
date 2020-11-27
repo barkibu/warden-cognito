@@ -36,6 +36,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'aws-sdk-cognitoidentityprovider', '~> 1.47'
   spec.add_dependency 'dry-auto_inject', '~> 0.6'
   spec.add_dependency 'dry-configurable', '~> 0.9'
+  spec.add_dependency 'http'
   spec.add_dependency 'jwt', '~> 2.1'
   spec.add_dependency 'warden', '~> 1.2'
 
