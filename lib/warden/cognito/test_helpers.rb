@@ -1,5 +1,3 @@
-require 'rspec'
-
 module Warden
   module Cognito
     class TestHelpers
