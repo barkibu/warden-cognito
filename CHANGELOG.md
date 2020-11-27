@@ -6,8 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.3]
+- Require the HTTP dependency
+
 ## [0.2.2]
-- Fix missin HTTP dependency
+- Fix missing HTTP dependency
 
 ## [0.2.1]
 - Fix rspec dependency in implementation
@@ -21,7 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Scratching the gem
 
-[Unreleased]: https://github.com/barkibu/warden-cognito/compare/v0.2.2...HEAD
+[Unreleased]: https://github.com/barkibu/warden-cognito/compare/v0.2.3...HEAD
+[0.2.3]: https://github.com/barkibu/warden-cognito/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/barkibu/warden-cognito/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/barkibu/warden-cognito/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/barkibu/warden-cognito/compare/v0.1.0...v0.2.0
