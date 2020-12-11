@@ -1,3 +1,4 @@
+require 'http'
 require 'jwt'
 require 'warden'
 require 'dry/configurable'
