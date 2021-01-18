@@ -9,7 +9,7 @@ module Warden
         end
 
         def find_by_token(token)
-          find(TokenDecoder.new(token, nil))
+          find(TokenDecoder.new(token))
         end
       end
 

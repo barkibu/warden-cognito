@@ -59,7 +59,7 @@ module Warden
       end
 
       def pool_identifier
-        auth_params[:pool_identifier]
+        auth_params[:pool_identifier]&.to_sym
       end
 
       def auth_params

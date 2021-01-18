@@ -53,7 +53,7 @@ You can know protects endpoints by settings the available strategies in the Ward
 
 The user repository will be used to look for an entity to mark as authenticated, it must implement the following:
 - `find_by_cognito_username` that should return the user identified by the given username or nil (receives as second param the pool_identifier)
-- `find_by_cognito_attribute` that should return the user identified by the given Cognito User attribute (`config.identifying_attribute`) or nil
+- `find_by_cognito_attribute` that should return the user identified by the given Cognito User attribute (`config.identifying_attribute`) or nil (receives as second param the pool_identifier)
 
 ### User Model
 
@@ -61,7 +61,7 @@ The user model must expose a message `cognito_id` that returns the `identifying_
 
 ### `after_local_user_not_found` Callback
 
-A callback triggered whenever the user correctly authenticated on Cognito but no local user exists (receives the full [cognito user](https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/CognitoIdentityProvider/Types/GetUserResponse.html))
+A callback triggered whenever the user correctly authenticated on Cognito but no local user exists (receives the full [cognito user](https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/CognitoIdentityProvider/Types/GetUserResponse.html), and the pool_identifier as second parameter).
 
 ### Cache 
 The cache used to store the AWS Json Web Keys as well as the mapping between local and remote identifiers.
@@ -114,7 +114,7 @@ This gem also exposes classes that you can use to validate tokens and/or fetch a
 
 ```ruby
 token = 'The token a user passed along in a request'
-token_decoder = TokenDecoder.new(token)
+token_decoder = TokenDecoder.new(token, nil) # Pass nil as pool_identifier to loop over all the configured pools and automatically bind the right one [Based on the issuer]
 
 # Is the token valid ?
 token_decoder.validate!

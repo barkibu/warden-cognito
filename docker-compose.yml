@@ -5,5 +5,8 @@ services:
     command: tail -f Gemfile
     volumes:
       - .:/app
+      - bundle:/usr/local/bundle
       - ~/.gitconfig:/root/.gitconfig
 
+volumes:
+  bundle:

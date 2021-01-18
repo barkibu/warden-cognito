@@ -3,7 +3,7 @@ module Warden
     class TokenDecoder
       attr_reader :jwk_loader, :token
 
-      def initialize(token, pool_identifier)
+      def initialize(token, pool_identifier = nil)
         @token = token
         @jwk_loader = find_loader(pool_identifier)
       end
@@ -51,7 +51,7 @@ module Warden
             loader.user_pool = pool_identifier
           end
         end
-        JwkLoader.pool_iterator.detect(-> { JwkLoader.default_pool }) do |loader|
+        JwkLoader.pool_iterator.detect(JwkLoader.invalid_issuer_error) do |loader|
           loader.issued? token
         end
       end

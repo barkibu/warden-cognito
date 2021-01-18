@@ -1,7 +1,5 @@
 module Warden
   module Cognito
-    class UnknownPoolIdentifier < CognitoError; end
-
     class CognitoClient
       include Cognito::Import['user_pools']
       include HasUserPoolIdentifier
@@ -31,8 +29,14 @@ module Warden
       class << self
         def scope(pool_identifier)
           new.tap do |client|
-            client.user_pool = pool_identifier
+            client.user_pool = pool_identifier || default_pool_identifier
           end
+        end
+
+        private
+
+        def default_pool_identifier
+          Warden::Cognito.config.user_pools.first.identifier
         end
       end
     end
