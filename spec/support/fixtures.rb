@@ -14,11 +14,11 @@ module Fixtures
 
   # User repository
   class UserRepo
-    def self.find_by_cognito_username(_username)
+    def self.find_by_cognito_username(_username, _pool_identifier)
       User.instance
     end
 
-    def self.find_by_cognito_attribute(_attribute)
+    def self.find_by_cognito_attribute(_attribute, _pool_identifier)
       User.instance
     end
   end
@@ -26,11 +26,11 @@ module Fixtures
   # User repository that mimics returning a nil user (probably a user that has
   # been deleted)
   class NilUserRepo
-    def self.find_by_cognito_username(_username)
+    def self.find_by_cognito_username(_username, _pool_identifier)
       nil
     end
 
-    def self.find_by_cognito_attribute(_attribute)
+    def self.find_by_cognito_attribute(_attribute, _pool_identifier)
       nil
     end
   end

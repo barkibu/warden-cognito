@@ -9,8 +9,8 @@ module Warden
         end
       end
 
-      def call(cognito_user)
-        after_local_user_not_found&.call(cognito_user)
+      def call(cognito_user, pool_identifier)
+        after_local_user_not_found&.call(cognito_user, pool_identifier)
       end
     end
   end
