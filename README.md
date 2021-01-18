@@ -29,15 +29,11 @@ Configure how the gem maps Cognito users to local ones adding to your initialize
  Warden::Cognito.configure do |config|
     config.user_repository = User
     config.identifying_attribute = 'sub'
-    config.after_local_user_not_found = ->(cognito_user) { User.create(username: cognito_user.username) }
+    config.after_local_user_not_found = ->(cognito_user, pool_identifier) { User.create(username: cognito_user.username) }
     config.cache =  ActiveSupport::Cache::MemCacheStore.new
+    config.user_pools = { default: {region: 'AWS_REGION', pool_id: 'AWS Cognito UserPool Id', client_id: 'AWS Cognito Client Id'} }
 end
 ```
-
-This gem will look for the following the env variables:
-- **AWS_REGION**
-- **AWS_COGNITO_USER_POOL_ID**
-- **AWS_COGNITO_CLIENT_ID**
 
 ### With Devise
 
@@ -56,7 +52,7 @@ You can know protects endpoints by settings the available strategies in the Ward
 ### User Repository
 
 The user repository will be used to look for an entity to mark as authenticated, it must implement the following:
-- `find_by_cognito_username` that should return the user identified by the given username or nil
+- `find_by_cognito_username` that should return the user identified by the given username or nil (receives as second param the pool_identifier)
 - `find_by_cognito_attribute` that should return the user identified by the given Cognito User attribute (`config.identifying_attribute`) or nil
 
 ### User Model

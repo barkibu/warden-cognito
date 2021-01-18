@@ -9,6 +9,8 @@ require 'active_support/core_ext'
 
 module Warden
   module Cognito
+    class CognitoError < StandardError; end
+
     extend Dry::Configurable
 
     def jwk_config_keys
@@ -20,7 +22,18 @@ module Warden
       Struct.new(*jwk_config_keys, keyword_init: true).new(attributes)
     end
 
-    module_function :jwk_config_keys, :jwk_instance
+    def user_pool_configuration_keys
+      %i[identifier region user_pool_id client_id]
+    end
+
+    def user_pool_configurations(value)
+      value.map do |key, conf|
+        attributes = conf.symbolize_keys.slice(*user_pool_configuration_keys).merge(identifier: key)
+        Struct.new(*user_pool_configuration_keys, keyword_init: true).new(attributes)
+      end
+    end
+
+    module_function :jwk_config_keys, :jwk_instance, :user_pool_configuration_keys, :user_pool_configurations
 
     setting :user_repository
     setting(:identifying_attribute, 'sub', &:to_s)
@@ -28,6 +41,8 @@ module Warden
     setting :cache, ActiveSupport::Cache::NullStore.new
 
     setting(:jwk, nil) { |value| jwk_instance(value) }
+
+    setting(:user_pools, []) { |value| user_pool_configurations(value) }
 
     Import = Dry::AutoInject(config)
   end
