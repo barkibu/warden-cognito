@@ -76,7 +76,8 @@ RSpec.describe Warden::Cognito::TokenAuthenticatableStrategy do
 
       context 'referencing an existing (local) user' do
         it 'succeeds with the user instance' do
-          expect(config.user_repository).to receive(:find_by_cognito_attribute).with(local_identifier).and_call_original
+          expect(config.user_repository).to receive(:find_by_cognito_attribute).with(local_identifier,
+                                                                                     pool_identifier).and_call_original
           expect(strategy).to receive(:success!).with(user)
           strategy.authenticate!
         end
@@ -88,7 +89,8 @@ RSpec.describe Warden::Cognito::TokenAuthenticatableStrategy do
         end
 
         it 'calls the `after_local_user_not_found` callback' do
-          expect(config.after_local_user_not_found).to receive(:call).with(cognito_user).and_call_original
+          expect(config.after_local_user_not_found).to receive(:call).with(cognito_user,
+                                                                           pool_identifier).and_call_original
           strategy.authenticate!
         end
 

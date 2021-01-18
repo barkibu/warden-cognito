@@ -1,11 +1,17 @@
 module Warden
   module Cognito
     class JwkLoader
-      include Cognito::Import['cache']
-      include Cognito::Import['jwk']
+      include Cognito::Import['cache', 'jwk', 'user_pools']
+      include HasUserPoolIdentifier
 
       def jwt_issuer
-        jwk.issuer || "https://cognito-idp.#{ENV['AWS_REGION']}.amazonaws.com/#{ENV['AWS_COGNITO_USER_POOL_ID']}"
+        jwk.issuer || "https://cognito-idp.#{user_pool.region}.amazonaws.com/#{user_pool.pool_id}"
+      end
+
+      def issued?(token)
+        ::JWT.decode(token, nil, false).first['iss'] == jwt_issuer
+      rescue StandardError
+        false
       end
 
       def call(options)

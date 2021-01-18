@@ -32,13 +32,13 @@ RSpec.describe Warden::Cognito::TestHelpers do
     it 'returns a token identifying the provided user' do
       token_decoder = token_decoder(auth_headers)
 
-      expect(user_repository).to receive(:find_by_cognito_attribute).with(cognito_id).and_return(user)
+      expect(user_repository).to receive(:find_by_cognito_attribute).with(cognito_id, pool_identifier).and_return(user)
       expect(Warden::Cognito::LocalUserMapper.find(token_decoder)).to eq user
     end
 
     def token_decoder(headers)
       token = headers[:Authorization].split[1]
-      Warden::Cognito::TokenDecoder.new(token)
+      Warden::Cognito::TokenDecoder.new(token, Warden::Cognito.config.user_pools.first.identifier)
     end
   end
 end

@@ -22,7 +22,7 @@ module Warden
       end
 
       def authenticate!
-        user = local_user || UserNotFoundCallback.call(cognito_user)
+        user = local_user || UserNotFoundCallback.call(cognito_user, token_decoder.pool_identifier)
 
         fail!(:unknown_user) unless user.present?
         success!(user)
@@ -43,7 +43,11 @@ module Warden
       end
 
       def token_decoder
-        @token_decoder ||= TokenDecoder.new(token)
+        @token_decoder ||= TokenDecoder.new(token, pool_identifier)
+      end
+
+      def pool_identifier
+        env['HTTP_X_AUTHORIZATION_POOL_IDENTIFIER']
       end
 
       def token

@@ -4,8 +4,8 @@ module Warden
       include Cognito::Import['after_local_user_not_found']
 
       class << self
-        def call(cognito_user)
-          new.call(cognito_user)
+        def call(cognito_user, pool_identifier)
+          new.call(cognito_user, pool_identifier)
         end
       end
 
