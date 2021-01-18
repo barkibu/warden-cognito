@@ -23,7 +23,7 @@ module Warden
     end
 
     def user_pool_configuration_keys
-      %i[identifier region user_pool_id client_id]
+      %i[identifier region pool_id client_id]
     end
 
     def user_pool_configurations(value)
@@ -48,6 +48,8 @@ module Warden
   end
 end
 
+require 'warden/cognito/pool_related_iterator'
+require 'warden/cognito/has_user_pool_identifier'
 require 'warden/cognito/jwk_loader'
 require 'warden/cognito/version'
 require 'warden/cognito/user_not_found_callback'

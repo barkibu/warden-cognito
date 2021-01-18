@@ -4,7 +4,7 @@ module Warden
 
     class CognitoClient
       include Cognito::Import['user_pools']
-      attr_reader :user_pool
+      include HasUserPoolIdentifier
 
       # https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/CognitoIdentityProvider/Types/GetUserResponse.html
       def fetch(access_token)
@@ -22,14 +22,6 @@ module Warden
         )
       end
 
-      def user_pool=(pool_identifier)
-        @user_pool = user_pools.detect(->{user_pools.first}) { |pool| pool.identifier == pool_identifier }
-      end
-
-      def pool_identifier
-        user_pool.identifier
-      end
-
       private
 
       def client
@@ -39,7 +31,7 @@ module Warden
       class << self
         def scope(pool_identifier)
           new.tap do |client|
-             client.user_pool = pool_identifier
+            client.user_pool = pool_identifier
           end
         end
       end
