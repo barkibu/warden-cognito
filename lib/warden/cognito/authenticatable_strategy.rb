@@ -17,7 +17,7 @@ module Warden
       end
 
       def authenticate!
-        attempt = CognitoClient.initiate_auth(email, password)
+        attempt = cognito_client.initiate_auth(email, password)
 
         return fail(:unknow_cognito_response) unless attempt
 
@@ -33,13 +33,17 @@ module Warden
 
       private
 
+      def cognito_client
+        CognitoClient.scope pool_identifier
+      end
+
       def trigger_callback(authentication_result)
-        cognito_user = CognitoClient.fetch(authentication_result.access_token)
-        user_not_found_callback.call(cognito_user)
+        cognito_user = cognito_client.fetch(authentication_result.access_token)
+        user_not_found_callback.call(cognito_user, cognito_client.pool_identifier)
       end
 
       def local_user
-        helper.find_by_cognito_username(email)
+        helper.find_by_cognito_username(email, cognito_client.pool_identifier)
       end
 
       def cognito_authenticable?
@@ -54,8 +58,12 @@ module Warden
         auth_params[:password]
       end
 
+      def pool_identifier
+        auth_params[:pool_identifier]&.to_sym
+      end
+
       def auth_params
-        params[scope.to_s].symbolize_keys.slice(:password, :email)
+        params[scope.to_s].symbolize_keys.slice(:password, :email, :pool_identifier)
       end
     end
   end

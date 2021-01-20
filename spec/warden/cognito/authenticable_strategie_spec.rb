@@ -19,7 +19,10 @@ RSpec.describe Warden::Cognito::AuthenticatableStrategy do
     }
   end
   let(:env) { Rack::MockRequest.env_for(path, method: 'GET', params: params) }
-
+  let(:not_authorized_exception) do
+    Aws::CognitoIdentityProvider::Errors::NotAuthorizedException.new(nil,
+                                                                     'Invalid Login')
+  end
   describe '.valid?' do
     it 'returns true for sign in requests' do
       expect(strategy.valid?).to be_truthy
@@ -45,11 +48,6 @@ RSpec.describe Warden::Cognito::AuthenticatableStrategy do
     end
 
     context 'with wrong credentials' do
-      let(:not_authorized_exception) do
-        Aws::CognitoIdentityProvider::Errors::NotAuthorizedException.new(nil,
-                                                                         'Invalid Login')
-      end
-
       before do
         allow(client).to receive(:initiate_auth).and_raise not_authorized_exception
       end
@@ -81,7 +79,7 @@ RSpec.describe Warden::Cognito::AuthenticatableStrategy do
         end
 
         it 'calls the `after_local_user_not_found` callback' do
-          expect(config.after_local_user_not_found).to receive(:call).with(cognito_user)
+          expect(config.after_local_user_not_found).to receive(:call).with(cognito_user, pool_identifier)
           strategy.authenticate!
         end
 
@@ -102,6 +100,48 @@ RSpec.describe Warden::Cognito::AuthenticatableStrategy do
           end
 
           it 'success! with the given user' do
+            expect(strategy).to receive(:success!).with(user)
+            strategy.authenticate!
+          end
+        end
+      end
+    end
+
+    context 'with a second user_pool configured and specified in params' do
+      let(:clientIdPoolA) { 'AWS Cognito Client ID Pool A' }
+      let(:clientIdSpecificPool) { 'AWS Cognito Client ID Specific Pool' }
+      let(:user_pool_configurations) do
+        {
+          poolA: { region: 'EU_WEST_1', pool_id: 'PoolB_Id', client_id: clientIdPoolA },
+          "#{pool_identifier}": { region: 'EU_WEST_1', pool_id: 'PoolA_Id', client_id: clientIdSpecificPool }
+        }
+      end
+
+      let(:params) do
+        {
+          v2_user: {
+            email: email,
+            password: password,
+            pool_identifier: pool_identifier.to_s
+          }
+        }
+      end
+
+      it 'creates a CognitoClient with the specified pool in scope' do
+        expect(Warden::Cognito::CognitoClient).to receive(:scope).with(pool_identifier)
+        strategy.authenticate!
+      end
+
+      context 'with right credentials' do
+        before do
+          allow(client).to receive(:initiate_auth).with(hash_including(client_id: clientIdSpecificPool))
+                                                  .and_return(initiate_auth_response)
+          allow(initiate_auth_response).to receive(:authentication_result).and_return(authentication_result)
+          allow(authentication_result).to receive(:access_token).and_return(access_token)
+        end
+
+        context 'with existing local user' do
+          it 'call success with an existing user' do
             expect(strategy).to receive(:success!).with(user)
             strategy.authenticate!
           end
