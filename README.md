@@ -82,12 +82,12 @@ module Helpers
       end
     end
 
-    def auth_headers_for_user(user, headers = {})
-      Warden::Cognito::TestHelpers.auth_headers(headers, user)
+    def auth_headers_for_user(user, pool_identifier, headers = {})
+      Warden::Cognito::TestHelpers.auth_headers(headers, user, pool_identifier)
     end
 
-    def jwt_for_user(user)
-      auth_headers_for_user(user)[:Authorization].split[1]
+    def jwt_for_user(user, pool_identifier)
+      auth_headers_for_user(user, pool_identifier)[:Authorization].split[1]
     end
   end
 end

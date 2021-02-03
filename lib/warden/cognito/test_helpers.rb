@@ -12,8 +12,8 @@ module Warden
           Warden::Cognito.config.jwk = { key: jwk, issuer: local_issuer }
         end
 
-        def auth_headers(headers, user)
-          headers.merge(Authorization: "Bearer #{generate_token(user)}")
+        def auth_headers(headers, user, pool_identifier = Warden::Cognito.config.user_pools.first.identifier)
+          headers.merge(Authorization: "Bearer #{generate_token(user, pool_identifier)}")
         end
 
         def local_issuer
@@ -22,10 +22,10 @@ module Warden
 
         private
 
-        def generate_token(user)
+        def generate_token(user, pool_identifier)
           payload = { sub: user.object_id,
                       "#{identifying_attribute}": user.cognito_id,
-                      iss: local_issuer }
+                      iss: "#{pool_identifier}-#{local_issuer}" }
           headers = { kid: jwk.kid }
           JWT.encode(payload, jwk.keypair, 'RS256', headers)
         end
