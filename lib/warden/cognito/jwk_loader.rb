@@ -5,7 +5,9 @@ module Warden
       include HasUserPoolIdentifier
 
       def jwt_issuer
-        jwk.issuer || "https://cognito-idp.#{user_pool.region}.amazonaws.com/#{user_pool.pool_id}"
+        return "#{user_pool.identifier}-#{jwk.issuer}" if jwk.issuer.present?
+
+        "https://cognito-idp.#{user_pool.region}.amazonaws.com/#{user_pool.pool_id}"
       end
 
       def issued?(token)
