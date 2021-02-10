@@ -23,7 +23,7 @@ module Warden
       private
 
       def client
-        Aws::CognitoIdentityProvider::Client.new
+        Aws::CognitoIdentityProvider::Client.new region: user_pool.region
       end
 
       class << self
