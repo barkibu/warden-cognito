@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Improve test helpers to include `jti` and `exp` claims and accept user-supplied claims.
+
 ## [0.3.2]
 - Fix - specify region on scoped aws client
 
