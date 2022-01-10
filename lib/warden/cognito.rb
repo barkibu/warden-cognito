@@ -36,11 +36,11 @@ module Warden
     module_function :jwk_config_keys, :jwk_instance, :user_pool_configuration_keys, :user_pool_configurations
 
     setting :user_repository
-    setting(:identifying_attribute, 'sub', &:to_s)
+    setting(:identifying_attribute, default: 'sub', &:to_s)
     setting :after_local_user_not_found
-    setting :cache, ActiveSupport::Cache::NullStore.new
+    setting :cache, default: ActiveSupport::Cache::NullStore.new
 
-    setting(:jwk, nil) { |value| jwk_instance(value) }
+    setting(:jwk, default: nil) { |value| jwk_instance(value) }
 
     setting(:user_pools, []) { |value| user_pool_configurations(value) }
 
