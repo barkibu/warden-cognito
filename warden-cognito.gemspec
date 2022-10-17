@@ -32,7 +32,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
   spec.required_ruby_version = '>= 2.6'
 
-  spec.add_dependency 'activesupport', '~> 6.0'
+  spec.add_dependency 'activesupport', ['>= 6.0', '< 8.0']
   spec.add_dependency 'aws-sdk-cognitoidentityprovider', '~> 1.47'
   spec.add_dependency 'dry-auto_inject', '~> 0.6'
   spec.add_dependency 'dry-configurable', '~> 0.9'
