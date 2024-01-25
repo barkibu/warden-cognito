@@ -38,7 +38,7 @@ module Warden
     setting :user_repository
     setting :identifying_attribute, default: 'sub', constructor: ->(attr) { attr.to_s }
     setting :after_local_user_not_found
-    setting :cache, default: ActiveSupport::Cache::NullStore.new
+    setting :cache, default: (defined?(Rails) ? Rails.cache : ActiveSupport::Cache::NullStore.new)
 
     setting :jwk, default: nil, constructor: ->(value) { jwk_instance(value) }
 
