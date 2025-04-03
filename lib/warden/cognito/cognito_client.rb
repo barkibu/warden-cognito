@@ -20,10 +20,26 @@ module Warden
         )
       end
 
+      def exchange_token(token, username)
+        client.initiate_auth(
+          auth_flow: 'REFRESH_TOKEN',
+          client_id: user_pool.client_id,
+          auth_parameters: {
+            'REFRESH_TOKEN' => token,
+            'SECRET_HASH' => gen_secret(username)
+          }
+        )
+      end
+
       private
 
       def client
         Aws::CognitoIdentityProvider::Client.new region: user_pool.region
+      end
+
+      def gen_secret(username)
+        message = username + user_pool.client_id
+        [OpenSSL::HMAC.digest('SHA256', user_pool.client_secret, message)].pack('m0')
       end
 
       class << self

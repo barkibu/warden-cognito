@@ -36,6 +36,10 @@ module Warden
         fail(:unknown_error)
       end
 
+      def store?
+        false
+      end
+
       private
 
       def cognito_user
@@ -47,7 +51,9 @@ module Warden
       end
 
       def token_decoder
-        @token_decoder ||= TokenDecoder.new(token, pool_identifier)
+        cookie_setter = ->(key, value) { cookies[key] = value }
+
+        @token_decoder ||= RefreshableTokenDecoder.new(token, refresh_token, cookie_setter, pool_identifier)
       end
 
       def pool_identifier
@@ -58,7 +64,19 @@ module Warden
         @token ||= extract_token
       end
 
+      def refresh_token
+        @refresh_token ||= extract_refresh_token
+      end
+
       def extract_token
+        cookies['AccessToken'].first || bearer_header
+      end
+
+      def extract_refresh_token
+        cookies['RefreshToken'].first
+      end
+
+      def bearer_header
         return nil unless authorization_header
 
         method, token = authorization_header.split
@@ -67,6 +85,10 @@ module Warden
 
       def authorization_header
         env['HTTP_AUTHORIZATION']
+      end
+
+      def cookies
+        @cookies ||= CGI::Cookie.parse(env['HTTP_COOKIE'])
       end
     end
   end

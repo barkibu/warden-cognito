@@ -23,7 +23,7 @@ module Warden
     end
 
     def user_pool_configuration_keys
-      %i[identifier region pool_id client_id]
+      %i[identifier region pool_id client_id client_secret]
     end
 
     def user_pool_configurations(value)
@@ -57,6 +57,7 @@ require 'warden/cognito/local_user_mapper'
 require 'warden/cognito/authenticatable_strategy'
 require 'warden/cognito/token_authenticatable_strategy'
 require 'warden/cognito/token_decoder'
+require 'warden/cognito/refreshable_token_decoder'
 require 'warden/cognito/user_helper'
 require 'warden/cognito/cognito_client'
 require 'warden/cognito/test_helpers'

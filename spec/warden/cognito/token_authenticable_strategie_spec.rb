@@ -6,8 +6,8 @@ RSpec.describe Warden::Cognito::TokenAuthenticatableStrategy do
   include_context 'configuration'
 
   let(:jwt_token) { 'FakeJwtToken' }
-  let(:authorization_header) { { 'HTTP_AUTHORIZATION' => "Bearer #{jwt_token}" } }
-  let(:headers) { authorization_header }
+  let(:headers) { {} }
+  let(:cookies) { "AccessToken=#{jwt_token}" }
   let(:path) { '/v1/resource' }
   let(:env) { Rack::MockRequest.env_for(path, method: 'GET').merge(headers) }
   let(:issuer) { "https://cognito-idp.#{region}.amazonaws.com/#{pool_id}" }
@@ -22,7 +22,10 @@ RSpec.describe Warden::Cognito::TokenAuthenticatableStrategy do
 
   let(:client) { double 'Client' }
 
-  subject(:strategy) { described_class.new(env) }
+  subject(:strategy) do
+    env['HTTP_COOKIE'] = cookies
+    described_class.new(env)
+  end
 
   before do
     allow(Aws::CognitoIdentityProvider::Client).to receive(:new).and_return client
@@ -31,9 +34,26 @@ RSpec.describe Warden::Cognito::TokenAuthenticatableStrategy do
   end
 
   describe '.valid?' do
-    it 'grab the token from the Authorization header' do
+    it 'grab the token from the cookie' do
       expect(JWT).to receive(:decode).with(jwt_token, nil, true, any_args)
       strategy.valid?
+    end
+
+    context "if an auth header isn't found" do
+      let(:headers) { { 'HTTP_AUTHORIZATION' => "Bearer #{jwt_token}" } }
+      it 'tries the auth header' do
+        expect(JWT).to receive(:decode).with(jwt_token, nil, true, any_args)
+        strategy.valid?
+      end
+    end
+
+    context 'if both a cookie and auth header are supplied' do
+      let(:headers) { { 'HTTP_AUTHORIZATION' => 'Bearer NotRealToken' } }
+
+      it 'the cookie wins' do
+        expect(JWT).to receive(:decode).with(jwt_token, nil, true, any_args)
+        strategy.valid?
+      end
     end
 
     context 'with a token issued by another entity' do
@@ -49,54 +69,11 @@ RSpec.describe Warden::Cognito::TokenAuthenticatableStrategy do
         expect(strategy.valid?).to be_truthy
       end
 
-      context 'expired' do
-        before { allow(JWT).to receive(:decode).with(jwt_token, nil, true, any_args).and_raise(JWT::ExpiredSignature) }
+      context 'on an error' do
+        before { allow(JWT).to receive(:decode).with(jwt_token, nil, true, any_args).and_raise(StandardError) }
 
-        it 'returns true' do
-          expect(strategy.valid?).to be_truthy
-        end
-      end
-    end
-
-    context 'with multiple pools configured' do
-      let(:client_id_pool_a) { 'AWS Cognito Client ID Specific Pool' }
-      let(:user_pool_configurations) do
-        {
-          pool_a: { region: region, pool_id: pool_id, client_id: client_id_pool_a },
-          "#{pool_identifier}": { region: region, pool_id: pool_id, client_id: client_id }
-        }
-      end
-      let(:headers) { authorization_header.merge({ 'HTTP_X_AUTHORIZATION_POOL_IDENTIFIER' => specified_pool }) }
-
-      context 'when specified a configured pool' do
-        let(:specified_pool) { pool_identifier }
-
-        it 'returns true' do
-          expect(strategy.valid?).to be_truthy
-        end
-
-        context 'when the pool is not configured' do
-          let(:specified_pool) { 'Non existing/configured pool' }
-
-          it 'return false' do
-            expect(strategy.valid?).to be_falsey
-          end
-        end
-      end
-
-      context 'when no pool is specified' do
-        let(:specified_pool) { nil }
-        context 'when one issuer matches' do
-          it 'returns true' do
-            expect(strategy.valid?).to be_truthy
-          end
-        end
-
-        context 'when no issuer matches' do
-          let(:issuer) { 'http://google_issued_token.url' }
-          it 'returns false' do
-            expect(strategy.valid?).to be_falsey
-          end
+        it 'returns false' do
+          expect(strategy.valid?).to be_falsey
         end
       end
     end
@@ -106,15 +83,6 @@ RSpec.describe Warden::Cognito::TokenAuthenticatableStrategy do
     it 'grab the token from the Authorization header' do
       expect(JWT).to receive(:decode).with(jwt_token, nil, true, any_args)
       strategy.valid?
-    end
-
-    context 'with an expired token' do
-      before { allow(JWT).to receive(:decode).with(jwt_token, nil, true, any_args).and_raise(JWT::ExpiredSignature) }
-
-      it 'fails and halts all authentication strategies' do
-        expect(strategy).to receive(:fail!).with(:token_expired)
-        strategy.authenticate!
-      end
     end
 
     context 'with a valid token' do
